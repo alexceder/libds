@@ -7,15 +7,15 @@
 #define HEAP_COMPARE >
 #define HEAP_COMPARE_INV <
 
-#define LEFT_CHILD(i) (2*i)
-#define RIGHT_CHILD(i) (2*i+1)
-#define PARENT(i) (i/2)
+#define LEFT_CHILD(i) (2*(i))
+#define RIGHT_CHILD(i) (2*(i)+1)
+#define PARENT(i) ((i)/2)
 
-struct heap {
+struct heap_s {
     vector *values;
 };
 
-typedef struct heap heap;
+typedef struct heap_s heap;
 
 void _heap_build(heap *h);
 void _heap_percolate_down(heap *h, size_t i);

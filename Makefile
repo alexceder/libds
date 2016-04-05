@@ -1,4 +1,5 @@
-FLAGS = -Wall -Wextra -Werror -pedantic -ansi -I./include
+# FLAGS = -Wall -Wextra -Werror -pedantic -ansi -I./include
+FLAGS = -Wall -pedantic -ansi -I./include
 
 ALL_C_FILES = $(wildcard ./src/*.c)
 
@@ -11,14 +12,20 @@ default:
 	@echo "DONE"
 .PHONY: default
 
-tests: slist hash bst bheap vector clean
+tests: flist hash bst bheap vector clean
 .PHONY: tests
 
-slist:
+list:
 	@mkdir -p bin
-	@gcc ./src/slist.c ./tests/test_slist.c -o ./bin/test_slist $(FLAGS) -g
-	@./bin/test_slist
-.PHONY: slist
+	@gcc ./src/list.c ./tests/test_list.c -o ./bin/test_list $(FLAGS) -g
+	@./bin/test_list
+.PHONY: list
+
+flist:
+	@mkdir -p bin
+	@gcc ./src/flist.c ./tests/test_flist.c -o ./bin/test_flist $(FLAGS) -g
+	@./bin/test_flist
+.PHONY: flist
 
 hash:
 	@mkdir -p bin
@@ -48,5 +55,6 @@ clean:
 	@echo "\nCleaning up.."
 	@rm -rf ./bin
 	@rm -rf ./shared
+	@rm -f *.o
 	@echo "DONE"
 .PHONY: clean

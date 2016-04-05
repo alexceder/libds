@@ -4,11 +4,11 @@
 #include "hash.h"
 
 size_t _hash_func(char *key, size_t size) {
-    unsigned int hash = 0;
-    int c;
-    while ((c = *key++)) {
-        hash += 37 * hash + c;
-    }
+    size_t hash = 0;
+
+    while (*key)
+        hash += 37 * hash + (*key++);
+
     return hash % size;
 }
 
@@ -18,37 +18,48 @@ size_t _probe_hash_func(size_t current_key, size_t size) {
 
 int _is_prime(size_t n) {
     size_t i, q;
+
     for (i = 3; ; i += 2) {
         q = n / i;
+
         if (q < i)
             return 1;
+
         if (n == q * i)
             return 0;
     }
+
     return 1;
 }
 
 size_t _next_prime(size_t n) {
     if (n <= 2)
         return 2;
+
     if (!(n & 1))
         ++n;
+
     for ( ; 0 == _is_prime(n); n += 2);
+
     return n;
 }
 
 bucket *_bucket_create(char *key, char *value) {
     bucket *b = malloc(sizeof(bucket));
+
     b->key = strdup(key);
     b->value = strdup(value);
+
     return b;
 }
 
 htable *htable_create() {
     htable *ht = malloc(sizeof(htable));
+
     ht->capacity = MIN_HASH_SIZE;
     ht->size = 0;
     ht->buckets = calloc(ht->capacity, sizeof(bucket *));
+
     return ht;
 }
 
@@ -70,16 +81,14 @@ size_t htable_capacity(htable *ht) {
     return ht->capacity;
 }
 
-bucket *htable_find(htable *ht, char *key) {
+bucket **htable_find(htable *ht, char *key) {
     size_t hash_key = _hash_func(key, ht->capacity);
 
     while (NULL != ht->buckets[hash_key]) {
-        /* key found */
         if (0 == strcmp(ht->buckets[hash_key]->key, key)) {
-            return ht->buckets[hash_key];
+            return &ht->buckets[hash_key];
         }
 
-        /* leverage linear probing */
         hash_key = _probe_hash_func(hash_key, ht->capacity);
     }
 
@@ -87,10 +96,10 @@ bucket *htable_find(htable *ht, char *key) {
 }
 
 char *htable_get(htable *ht, char *key) {
-    bucket *b = htable_find(ht, key);
+    bucket **b = htable_find(ht, key);
 
     if (NULL != b)
-        return b->value;
+        return (*b)->value;
 
     return NULL;
 }
@@ -106,15 +115,15 @@ size_t htable_count(htable *ht, char *key) {
 bucket *htable_insert(htable *ht, char *key, char *value) {
     size_t hash_key;
 
-    if (htable_load_factor(ht) > MAX_LOAD_FACTOR) htable_rehash(ht);
+    if (htable_load_factor(ht) > MAX_LOAD_FACTOR)
+        htable_rehash(ht);
 
     hash_key = _hash_func(key, ht->capacity);
 
     while (NULL != ht->buckets[hash_key]) {
         /* overwrite this key */
         if (0 == strcmp(ht->buckets[hash_key]->key, key)) {
-            ht->buckets[hash_key]->value = realloc(ht->buckets[hash_key]->value, sizeof(char)*(strlen(value)+1));
-            strcpy(ht->buckets[hash_key]->value, value);
+            ht->buckets[hash_key]->value = strdup(value);
             return ht->buckets[hash_key];
         }
 
@@ -124,8 +133,21 @@ bucket *htable_insert(htable *ht, char *key, char *value) {
     }
 
     ht->buckets[hash_key] = _bucket_create(key, value);
-    ht->size++;
+    ++ht->size;
+
     return ht->buckets[hash_key];
+}
+
+void htable_erase(htable *ht, char *key) {
+    bucket **b = htable_find(ht, key);
+
+    if (NULL != b) {
+        free((*b)->key);
+        free((*b)->value);
+        free(*b);
+        *b = NULL;
+        --ht->size;
+    }
 }
 
 void htable_clear(htable *ht) {
@@ -143,24 +165,6 @@ void htable_clear(htable *ht) {
     ht->buckets = realloc(ht->buckets, sizeof(char *)*MIN_HASH_SIZE);
     ht->capacity = MIN_HASH_SIZE;
     ht->size = 0;
-}
-
-void htable_erase(htable *ht, char *key) {
-    /* TODO Try and figure out a way to utilize the find function */
-    size_t hash_key = _hash_func(key, ht->capacity);
-
-    while (NULL != ht->buckets[hash_key]) {
-        if (0 == strcmp(ht->buckets[hash_key]->key, key)) {
-            free(ht->buckets[hash_key]->value);
-            free(ht->buckets[hash_key]->key);
-            free(ht->buckets[hash_key]);
-            ht->buckets[hash_key] = NULL;
-            ht->size--;
-            return;
-        }
-
-        hash_key = _probe_hash_func(hash_key, ht->capacity);
-    }
 }
 
 float htable_load_factor(htable *ht) {

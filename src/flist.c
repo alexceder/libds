@@ -1,12 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "slist.h"
+#include "flist.h"
 
-#define loop_list for ( ; NULL != current->next; current = current->next)
+#define loop_flist for ( ; NULL != current->next; current = current->next)
 
-lnode *_lnode_create(char *value) {
-    lnode *n = malloc(sizeof(lnode));
+flnode *_flnode_create(char *value) {
+    flnode *n = malloc(sizeof(flnode));
     n->next = NULL;
     if (value) {
         n->value = malloc(sizeof(char)*(strlen(value)+1));
@@ -18,55 +18,55 @@ lnode *_lnode_create(char *value) {
     return n;
 }
 
-void _lnode_destroy(lnode *ln) {
+void _flnode_destroy(flnode *ln) {
     free(ln->value);
     free(ln);
 }
 
-list *list_create() {
-    lnode *root = _lnode_create(NULL);
-    list *l = malloc(sizeof(list));
+flist *flist_create() {
+    flnode *root = _flnode_create(NULL);
+    flist *l = malloc(sizeof(flist));
     l->root = root;
     l->size = 0;
 
     return l;
 }
 
-void list_destroy(list *l) {
-    list_clear(l);
-    _lnode_destroy(l->root);
+void flist_destroy(flist *l) {
+    flist_clear(l);
+    _flnode_destroy(l->root);
     free(l);
 }
 
-size_t list_size(list *l) {
+size_t flist_size(flist *l) {
     return l->size;
 }
 
-lnode *list_insert(list *l, char *value) {
-    lnode *current = l->root;
+flnode *flist_insert(flist *l, char *value) {
+    flnode *current = l->root;
 
-    loop_list {
+    loop_flist {
         if (strcmp(current->next->value, value) > 0) {
-            lnode *temp = current->next;
-            current->next = _lnode_create(value);
+            flnode *temp = current->next;
+            current->next = _flnode_create(value);
             current->next->next = temp;
             l->size++;
             return current->next;
         }
     }
 
-    current->next = _lnode_create(value);
+    current->next = _flnode_create(value);
     l->size++;
     return current->next;
 }
 
-void list_clear(list *l) {
-    lnode *current = l->root;
-    lnode *temp;
+void flist_clear(flist *l) {
+    flnode *current = l->root;
+    flnode *temp;
 
     while (NULL != current->next) {
         temp = current->next;
-        _lnode_destroy(current);
+        _flnode_destroy(current);
         current = temp;
         l->size--;
     }
@@ -74,10 +74,10 @@ void list_clear(list *l) {
     l->root = current;
 }
 
-int list_value_exists(list *l, char *value) {
-    lnode *current = l->root;
+int flist_value_exists(flist *l, char *value) {
+    flnode *current = l->root;
 
-    loop_list {
+    loop_flist {
         if (0 == strcmp(current->next->value, value)) {
             return 1;
         }
@@ -86,13 +86,13 @@ int list_value_exists(list *l, char *value) {
     return 0;
 }
 
-char *list_dump(list *l) {
-    lnode *current = l->root;
+char *flist_dump(flist *l) {
+    flnode *current = l->root;
     char *buffer;
     size_t num_chars = 0;
 
     /* calculate the number of bytes to allocate */
-    loop_list {
+    loop_flist {
         num_chars += strlen(current->next->value);
     }
 
@@ -102,7 +102,7 @@ char *list_dump(list *l) {
     current = l->root;
 
     strcpy(buffer, "{");
-    loop_list {
+    loop_flist {
         strcat(buffer, " ");
         strcat(buffer, current->next->value);
     }

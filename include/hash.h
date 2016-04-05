@@ -13,22 +13,22 @@ size_t _probe_hash_func(size_t current_key, size_t size);
 int _is_prime(size_t n);
 size_t _next_prime(size_t n);
 
-struct bucket {
+struct bucket_s {
     char *key;
     char *value;
 };
 
-typedef struct bucket bucket;
+typedef struct bucket_s bucket;
 
 bucket *_bucket_create(char *key, char *value);
 
-struct htable {
+struct htable_s {
     bucket **buckets;
     size_t capacity;
     size_t size;
 };
 
-typedef struct htable htable;
+typedef struct htable_s htable;
 
 /* constructor & destructor */
 htable *htable_create();
@@ -40,14 +40,14 @@ size_t htable_size(htable *ht);
 size_t htable_capacity(htable *ht);
 
 /* accessors */
-bucket *htable_find(htable *ht, char *key);
+bucket **htable_find(htable *ht, char *key);
 char *htable_get(htable *ht, char *key);
 size_t htable_count(htable *ht, char *key);
 
 /* modifiers */
 bucket *htable_insert(htable *ht, char *key, char *value);
-void htable_clear(htable *ht);
 void htable_erase(htable *ht, char *key);
+void htable_clear(htable *ht);
 
 /* hash policy */
 float htable_load_factor(htable *ht);

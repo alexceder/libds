@@ -3,14 +3,14 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-struct vector {
+struct vector_s {
     char **values;
     size_t size;
     size_t capacity;
     size_t capacity_power;
 };
 
-typedef struct vector vector;
+typedef struct vector_s vector;
 
 void _vector_auto_resize(vector *v);
 

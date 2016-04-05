@@ -106,6 +106,7 @@ void test_htable_erase() {
     htable_insert(ht, "two", "2nd value");
 
     htable_erase(ht, "one");
+    htable_erase(ht, "does not exist");
 
     assert(0 == htable_count(ht, "one")
         && "Bucket with key one should not exist.");
